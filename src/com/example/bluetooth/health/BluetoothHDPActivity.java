@@ -75,7 +75,7 @@ public class BluetoothHDPActivity extends Activity {
 	private boolean mHealthServiceBound;
 
 	// myturnnow
-	private TextView mSys;
+	private TextView mWeight;
 	private TextView mDia;
 	private TextView mPul;
 	
@@ -128,7 +128,7 @@ public class BluetoothHDPActivity extends Activity {
 			case BluetoothHDPService.RECEIVED_SYS:
 				int sys = msg.arg1;
 				Log.i(TAG, "msg.arg1 @ sys is " + sys);
-				mSys.setText("" + sys);
+				mWeight.setText("" + sys);
 				break;
 			case BluetoothHDPService.RECEIVED_DIA:
 				int dia = msg.arg1;
@@ -168,9 +168,8 @@ public class BluetoothHDPActivity extends Activity {
 		mHealthServiceBound = false;
 		
 
-		mSys = (TextView) findViewById(R.id.Systolic);
-		mDia = (TextView) findViewById(R.id.Diastolic);
-		mPul = (TextView) findViewById(R.id.Pulse);
+		mWeight = (TextView) findViewById(R.id.weight);
+		
 		mVersion = (TextView) findViewById(R.id.Version);
 		// mSys.setText("blah");
 		try {
