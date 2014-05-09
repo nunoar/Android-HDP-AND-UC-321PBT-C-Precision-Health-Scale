@@ -40,12 +40,9 @@
     <string name="status_reg">App registration status: %d</string>
     <string name="status_unreg">App 	 status: %d</string>
     <string name="unregister">Unregister</string>
-    <string name="systolic">Systolic: </string>
-    <string name="diastolic">Diastolic: </string>
+    <string name="weight">Weight: </string>
     <string name="pulse">Pulse: </string>
-    <string name="sys">0</string>
-    <string name="dia">0</string>
-    <string name="pul">0</string>
+    <string name="zero">0</string>
     <string name="desc">Light Indicator</string>
     <string name="version">Version: </string>
 </resources>

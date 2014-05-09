@@ -111,55 +111,20 @@
             android:orientation="horizontal" >
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/systolic"
+                android:text="@string/weight"
                 android:textSize="20sp"
                 android:textStyle="bold" />
             <Space android:layout_width="10dp"
                 android:layout_height="0px" />
-            <TextView android:id="@+id/Systolic"
+            <TextView android:id="@+id/weight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sys"
+                android:text="@string/zero"
                 android:textSize="18sp"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="horizontal" >
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/diastolic"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-            <Space android:layout_width="10dp"
-                android:layout_height="0px" />
-            <TextView android:id="@+id/Diastolic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dia"
-                android:textSize="18sp"/>
-        </LinearLayout>
+            
         
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="horizontal" >
-            <TextView android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/pulse"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-            <Space android:layout_width="10dp"
-                android:layout_height="0px" />
-            <TextView android:id="@+id/Pulse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/pul"
-                android:textSize="18sp"/>
-        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
