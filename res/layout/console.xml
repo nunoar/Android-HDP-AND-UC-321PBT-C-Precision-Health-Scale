@@ -116,15 +116,23 @@
                 android:textStyle="bold" />
             <Space android:layout_width="10dp"
                 android:layout_height="0px" />
+<<<<<<< HEAD
+            <TextView android:id="@+id/Weight"
+=======
             <TextView android:id="@+id/weight"
+>>>>>>> 3f274879b36f08c76512d90d640488c7cc6fbacf
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/zero"
                 android:textSize="18sp"/>
         </LinearLayout>
 
+<<<<<<< HEAD
+
+=======
             
         
+>>>>>>> 3f274879b36f08c76512d90d640488c7cc6fbacf
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
