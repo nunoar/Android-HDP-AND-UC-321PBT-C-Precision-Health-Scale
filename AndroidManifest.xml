@@ -23,7 +23,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
     <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name=".BluetoothHDPActivity"
+        <activity android:name=".BHDPActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait">
             <intent-filter>
@@ -31,6 +31,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".BluetoothHDPService" />
+        <service android:name=".BHDPService" />
     </application>
 </manifest>

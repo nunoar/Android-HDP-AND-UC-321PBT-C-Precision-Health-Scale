@@ -56,10 +56,11 @@ import android.widget.Toast;
  * 5. When done, close the health channel and unregister the application.  The channel will
  *    also close when there is extended inactivity.
  */
-public class BluetoothHDPService extends Service {
-    private static final String TAG = "BluetoothHDPService";
-
-    public static final int RESULT_OK = 0;
+public class BHDPService extends Service {
+	
+	private final String TAG = "BHDPService";
+    
+	public static final int RESULT_OK = 0;
     public static final int RESULT_FAIL = -1;
 
     // Status codes sent back to the UI client.
@@ -91,9 +92,7 @@ public class BluetoothHDPService extends Service {
     public static final int MSG_DISCONNECT_CHANNEL = 401;
 
     // Got Reading
-    public static final int RECEIVED_SYS = 500;
-    public static final int RECEIVED_DIA = 501;
-    public static final int RECEIVED_PUL = 502;
+    public static final int RECEIVED_WEIGHT = 800;
     
     private BluetoothHealthAppConfiguration mHealthAppConfig;
     private BluetoothAdapter mBluetoothAdapter;
@@ -162,7 +161,7 @@ public class BluetoothHDPService extends Service {
         if (!mBluetoothAdapter.getProfileProxy(this, mBluetoothServiceListener,
                 BluetoothProfile.HEALTH)) {
             Toast.makeText(this, R.string.bluetooth_health_profile_not_available,
-                    Toast.LENGTH_LONG);
+                    Toast.LENGTH_LONG).show();
             stopSelf();
             return;
         }
@@ -334,7 +333,7 @@ public class BluetoothHDPService extends Service {
         @Override
         public void run() {
             FileInputStream fis = new FileInputStream(mFd.getFileDescriptor());
-            byte data[] = new byte[300];
+            byte data[] = new byte[500];
             try {
                 while(fis.read(data) > -1) {
                     // At this point, the application can pass the raw data to a parser that
@@ -343,9 +342,7 @@ public class BluetoothHDPService extends Service {
                 	if (data[0] != (byte) 0x00)
                 	{
                 		String test = byte2hex(data);
-                		Log.i(TAG, test);
 	                	if(data[0] == (byte) 0xE2){
-	                		Log.i(TAG, "E2");
 	                		//data_AR
 	                		count = 1;
 	                		(new WriteThread(mFd)).start();
@@ -357,61 +354,33 @@ public class BluetoothHDPService extends Service {
 	                		count = 2;
 	                		(new WriteThread(mFd)).start();
 	                	}
-	                	else if (data[0] == (byte)0xE7){
-	                		Log.i(TAG, "E7");
-	                		
+	                	else if (data[0] == (byte)0xE7){                		
+
 	                		//work for legacy device...
-	                		if (data[18] == (byte) 0x0d && data[19] == (byte) 0x1d)  //fixed report
+	                		if (data[18] == (byte) 0x0d && data[19] == (byte) 0x1e)  //fixed report
 	                		{
 	                			count = 3; 
 	                			//set invoke id so get correct response
 	                			invoke = new byte[] { data[6], data[7] };
 	                			//write back response
-	                			(new WriteThread(mFd)).start();		
+	                			(new WriteThread(mFd)).start();
+	                			
 	                			//parse data!!
-	                			int length = data[21];
-	                			Log.i(TAG, "length is " + length);
-	                			// check data-req-id 
-//                				int report_no = data[22+3];
-                				int number_of_data_packets = data[22+5];
-                				//packet_start starts from handle 0 byte
-	                			int packet_start = 30;
-	                			final int SYS_DIA_MAP_DATA = 1;
-	                			final int PULSE_DATA = 2;
-	                			final int ERROR_CODE_DATA = 3;
-                				for (int i = 0; i < number_of_data_packets; i++)
-	                			{
-                					int obj_handle = data[packet_start+1];
-                					switch (obj_handle)
-                					{
-                					case SYS_DIA_MAP_DATA:
-                						int sys = byteToUnsignedInt(data[packet_start+9]);
-                						int dia = byteToUnsignedInt(data[packet_start+11]);
-                						int map = byteToUnsignedInt(data[packet_start+13]);
-	                					//create team string... 9+13~9+20	
-	                					Log.i(TAG, "sys is "+ sys);
-	                					sendMessage(RECEIVED_SYS, sys);
-	                					Log.i(TAG, "dia is "+ dia);
-	                					sendMessage(RECEIVED_DIA, dia);
-	                					Log.i(TAG, "map is "+ map);
-	                					//test
-//	                					sendMessage(RECEIVED_MAP, map);
-                						break;
-                					case PULSE_DATA:
-                						//parse
-                						int pulse = byteToUnsignedInt(data[packet_start+5]);
-                						Log.i(TAG, "pulse is " + pulse);
-                						sendMessage(RECEIVED_PUL, pulse);
-                						break;
-                					case ERROR_CODE_DATA:
-                						//need more signal
-                						break;
-                					}
-                					packet_start += 4 + data[packet_start+3];	//4 = ignore beginning four bytes
-	                			}	                			
+	                			
+	                			  if(data[3] == (byte)0x3a){
+	                                  
+	                                  	String pr = test.substring(84,88);
+	                                  	Log.i( TAG, "PARSING weight hex"+pr);
+	                                  	int weight = Integer.parseInt(pr,16);
+
+
+	                                  	Log.i("PARSING weight int:", ""+weight);
+	                                      sendMessage(RECEIVED_WEIGHT, weight);
+	                                  }
+	                			
+	                			
 	                		}
-	                		else
-	                		{
+	                		else{
 	                			count = 2;
 	                		}
 	                	}
@@ -447,11 +416,34 @@ public class BluetoothHDPService extends Service {
             mFd = fd;
         }
 
+        public byte[] getBluetoothMacAddress() {
+    	    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    	 
+    	    // if device does not support Bluetooth
+    	    if(mBluetoothAdapter==null){
+    	        Log.d(TAG,"device does not support bluetooth");
+    	        return null;
+    	    }
+    	    
+    	    String [] mac = mBluetoothAdapter.getAddress().split(":");
+    	    byte [] macAddress = new byte[mac.length];
+    	    
+    	    for(int i = 0; i < mac.length; i++) {            
+    	    	Integer hex = Integer.parseInt(mac[i], 16);
+    	    	macAddress[i] = hex.byteValue();
+    	    }
+    	    
+    	    return macAddress;
+    	}
+        
         @Override
         public void run() {
         	FileOutputStream fos = new FileOutputStream(mFd.getFileDescriptor());
 //            FileInputStream fis = new FileInputStream(mFd.getFileDescriptor());
 //        	Association Response [0xE300]
+        	
+        	byte [] macAddress = getBluetoothMacAddress();
+        	
             final byte data_AR[] = new byte[] {			(byte) 0xE3, (byte) 0x00,
             											(byte) 0x00, (byte) 0x2C, 
 			            								(byte) 0x00, (byte) 0x00,
@@ -463,8 +455,8 @@ public class BluetoothHDPService extends Service {
 			            								(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
 			            								(byte) 0x80, (byte) 0x00, (byte) 0x00, (byte) 0x00,
 			            								(byte) 0x00, (byte) 0x08,  //bt add for phone, can be automate in the future
-			            								(byte) 0x3C, (byte) 0x5A, (byte) 0x37, (byte) 0xFF, 
-			            								(byte) 0xFE, (byte) 0x95, (byte) 0xEE, (byte) 0xE3,
+			            								macAddress[0], macAddress[1], macAddress[2], (byte) 0xFF,
+			            								(byte) 0xFE, macAddress[3], macAddress[4], macAddress[5],
 			            								(byte) 0x00, (byte) 0x00,
 			            								(byte) 0x00, (byte) 0x00,
 			            								(byte) 0x00, (byte) 0x00, 
@@ -484,7 +476,7 @@ public class BluetoothHDPService extends Service {
             final byte get_MDS[] = new byte[] { 	    (byte) 0xE7, (byte) 0x00,
 														(byte) 0x00, (byte) 0x0E,
 														(byte) 0x00, (byte) 0x0C,
-														(byte) 0x00, (byte) 0x24,
+														(byte) 0x12, (byte) 0x34,
 														(byte) 0x01, (byte) 0x03,
 														(byte) 0x00, (byte) 0x06,
 														(byte) 0x00, (byte) 0x00,
@@ -494,14 +486,6 @@ public class BluetoothHDPService extends Service {
             final byte data_RR[] = new byte[] {			(byte) 0xE5, (byte) 0x00,
             											(byte) 0x00, (byte) 0x02,
             											(byte) 0x00, (byte) 0x00 };
-            
-            final byte data_RRQ[] = new byte[] {		(byte) 0xE4, (byte) 0x00,
-            											(byte) 0x00, (byte) 0x02,
-            											(byte) 0x00, (byte) 0x00 };
-            
-            final byte data_ABORT[] = new byte[] {		(byte) 0xE6, (byte) 0x00,
-														(byte) 0x00, (byte) 0x02,
-														(byte) 0x00, (byte) 0x00 };
             try {
             	Log.i(TAG, String.valueOf(count));
             	if (count == 1)
@@ -525,6 +509,8 @@ public class BluetoothHDPService extends Service {
             		fos.write(data_RR);
             		Log.i(TAG, "Data Released!");
             	}
+            	
+            	fos.close();
             } catch(IOException ioe) {}
         }
     }

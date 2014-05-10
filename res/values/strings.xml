@@ -41,10 +41,6 @@
     <string name="status_unreg">App 	 status: %d</string>
     <string name="unregister">Unregister</string>
     <string name="weight">Weight: </string>
-<<<<<<< HEAD
-=======
-    <string name="pulse">Pulse: </string>
->>>>>>> 3f274879b36f08c76512d90d640488c7cc6fbacf
     <string name="zero">0</string>
     <string name="desc">Light Indicator</string>
     <string name="version">Version: </string>

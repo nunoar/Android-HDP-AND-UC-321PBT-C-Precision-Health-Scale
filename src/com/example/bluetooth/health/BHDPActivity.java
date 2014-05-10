@@ -46,11 +46,12 @@ import android.widget.Toast;
 
 /**
  * Main user interface for the Sample application. All Bluetooth health-related
- * operations happen in {@link BluetoothHDPService}. This activity passes
+ * operations happen in {@link BHDPService}. This activity passes
  * messages to and from the service.
  */
-public class BluetoothHDPActivity extends Activity {
-	private static final String TAG = "BluetoothHealthActivity";
+public class BHDPActivity extends Activity {
+	private final String TAG = "BluetoothHDPActivity";
+
 
 	// Use the appropriate IEEE 11073 data types based on the devices used.
 	// Below are some examples. Refer to relevant Bluetooth HDP specifications
@@ -76,9 +77,7 @@ public class BluetoothHDPActivity extends Activity {
 
 	// myturnnow
 	private TextView mWeight;
-	private TextView mDia;
-	private TextView mPul;
-	
+
 	// version number
 	private TextView mVersion;
 	// Handles events sent by {@link HealthHDPService}.
@@ -87,29 +86,29 @@ public class BluetoothHDPActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			// Application registration complete.
-			case BluetoothHDPService.STATUS_HEALTH_APP_REG:
+			case BHDPService.STATUS_HEALTH_APP_REG:
 				mStatusMessage.setText(String.format(
 						mRes.getString(R.string.status_reg), msg.arg1));
 				break;
 			// Application unregistration complete.
-			case BluetoothHDPService.STATUS_HEALTH_APP_UNREG:
+			case BHDPService.STATUS_HEALTH_APP_UNREG:
 				mStatusMessage.setText(String.format(
 						mRes.getString(R.string.status_unreg), msg.arg1));
 				break;
 			// Reading data from HDP device.
-			case BluetoothHDPService.STATUS_READ_DATA:
+			case BHDPService.STATUS_READ_DATA:
 				mStatusMessage.setText(mRes.getString(R.string.read_data));
 				mDataIndicator.setImageLevel(1);
 				break;
 			// Finish reading data from HDP device.
-			case BluetoothHDPService.STATUS_READ_DATA_DONE:
+			case BHDPService.STATUS_READ_DATA_DONE:
 				mStatusMessage.setText(mRes.getString(R.string.read_data_done));
 				mDataIndicator.setImageLevel(0);
 				break;
 			// Channel creation complete. Some devices will automatically
 			// establish
 			// connection.
-			case BluetoothHDPService.STATUS_CREATE_CHANNEL:
+			case BHDPService.STATUS_CREATE_CHANNEL:
 				Log.d(TAG, "STATUS_CREATE_CHANNEl enabled");
 				mStatusMessage.setText(String.format(
 						mRes.getString(R.string.status_create_channel),
@@ -119,26 +118,17 @@ public class BluetoothHDPActivity extends Activity {
 			// Channel destroy complete. This happens when either the device
 			// disconnects or
 			// there is extended inactivity.
-			case BluetoothHDPService.STATUS_DESTROY_CHANNEL:
+			case BHDPService.STATUS_DESTROY_CHANNEL:
 				mStatusMessage.setText(String.format(
 						mRes.getString(R.string.status_destroy_channel),
 						msg.arg1));
 				mConnectIndicator.setText(R.string.disconnected);
 				break;
-			case BluetoothHDPService.RECEIVED_SYS:
-				int sys = msg.arg1;
-				Log.i(TAG, "msg.arg1 @ sys is " + sys);
-				mWeight.setText("" + sys);
-				break;
-			case BluetoothHDPService.RECEIVED_DIA:
-				int dia = msg.arg1;
-				mDia.setText("" + dia);
-				Log.i(TAG, "msg.arg1 @ dia is " + dia);
-				break;
-			case BluetoothHDPService.RECEIVED_PUL:
-				int pul = msg.arg1;
-				Log.i(TAG, "msg.arg1 @ pulse is " + pul);
-				mPul.setText("" + pul);
+			case BHDPService.RECEIVED_WEIGHT:
+				int weight = msg.arg1;
+				Log.i(TAG, "msg.arg1 @ weight is " + weight);
+				mWeight.setText("" + weight);
+
 				break;
 			default:
 				super.handleMessage(msg);
@@ -156,7 +146,7 @@ public class BluetoothHDPActivity extends Activity {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
 			Toast.makeText(this, R.string.bluetooth_not_available,
-					Toast.LENGTH_LONG);
+					Toast.LENGTH_LONG).show();;
 			finish();
 			return;
 		}
@@ -168,8 +158,9 @@ public class BluetoothHDPActivity extends Activity {
 		mHealthServiceBound = false;
 		
 
-		mWeight = (TextView) findViewById(R.id.weight);
-		
+
+		mWeight = (TextView) findViewById(R.id.Weight);
+
 		mVersion = (TextView) findViewById(R.id.Version);
 		// mSys.setText("blah");
 		try {
@@ -185,7 +176,7 @@ public class BluetoothHDPActivity extends Activity {
 		Button registerAppButton = (Button) findViewById(R.id.button_register_app);
 		registerAppButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				sendMessage(BluetoothHDPService.MSG_REG_HEALTH_APP,
+				sendMessage(BHDPService.MSG_REG_HEALTH_APP,
 						HEALTH_PROFILE_SOURCE_DATA_TYPE);
 			}
 		});
@@ -195,7 +186,7 @@ public class BluetoothHDPActivity extends Activity {
 		Button unregisterAppButton = (Button) findViewById(R.id.button_unregister_app);
 		unregisterAppButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				sendMessage(BluetoothHDPService.MSG_UNREG_HEALTH_APP, 0);
+				sendMessage(BHDPService.MSG_UNREG_HEALTH_APP, 0);
 			}
 		});
 
@@ -250,7 +241,7 @@ public class BluetoothHDPActivity extends Activity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mHealthServiceBound = true;
 			Message msg = Message.obtain(null,
-					BluetoothHDPService.MSG_REG_CLIENT);
+					BHDPService.MSG_REG_CLIENT);
 			msg.replyTo = mMessenger;
 			mHealthService = new Messenger(service);
 			try {
@@ -317,16 +308,16 @@ public class BluetoothHDPActivity extends Activity {
 	}
 
 	private void connectChannel() {
-		sendMessageWithDevice(BluetoothHDPService.MSG_CONNECT_CHANNEL);
+		sendMessageWithDevice(BHDPService.MSG_CONNECT_CHANNEL);
 	}
 
 	private void disconnectChannel() {
-		sendMessageWithDevice(BluetoothHDPService.MSG_DISCONNECT_CHANNEL);
+		sendMessageWithDevice(BHDPService.MSG_DISCONNECT_CHANNEL);
 	}
 
 	private void initialize() {
 		// Starts health service.
-		Intent intent = new Intent(this, BluetoothHDPService.class);
+		Intent intent = new Intent(this, BHDPService.class);
 		startService(intent);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 	}
@@ -413,7 +404,7 @@ public class BluetoothHDPActivity extends Activity {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int which) {
-									((BluetoothHDPActivity) getActivity())
+									((BHDPActivity) getActivity())
 											.connectChannel();
 								}
 							})
@@ -421,7 +412,7 @@ public class BluetoothHDPActivity extends Activity {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int which) {
-									((BluetoothHDPActivity) getActivity())
+									((BHDPActivity) getActivity())
 											.setDevice(which);
 								}
 							}).create();
